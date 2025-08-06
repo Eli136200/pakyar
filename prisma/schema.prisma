@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  phone     String     @unique
+  createdAt DateTime   @default(now())
+  otps      OtpCode[]
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  code      String
+  expiresAt DateTime
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

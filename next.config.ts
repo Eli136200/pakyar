@@ -1,7 +1,18 @@
-import type { NextConfig } from "next";
+// next.config.ts
+
+// @ts-ignore → نادیده گرفتن ارور تایپ‌اسکریپت چون next-pwa تعریف type رسمی ندارد
+import withPWA from 'next-pwa';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: true
 };
 
-export default nextConfig;
+const config = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
+
+export default config(nextConfig);
