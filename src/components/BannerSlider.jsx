@@ -23,9 +23,9 @@ export default function BannerSlider() {
   };
 
   const images = [
-    '/banners/banner1.jpg',
-    '/banners/banner2.jpg',
-    '/banners/banner3.jpg',
+    '/banners/Banner1.jpg',
+    '/banners/Banner2.jpg',
+    '/banners/Banner3.jpg',
   ];
 
   return (
