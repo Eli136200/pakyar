@@ -1,5 +1,3 @@
-// next.config.ts
-
 import withPWA from "next-pwa";
 import type { NextConfig } from "next";
 
@@ -12,8 +10,17 @@ const baseConfig: NextConfig = {
   // جلوگیری از توقف Build روی Render به‌خاطر خطاهای ESLint
   eslint: { ignoreDuringBuilds: true },
 
-  // اگر به هر دلیل خواستی TypeScript-Errors هم جلوی بیلد را نگیرند → true (پیشنهاد نمی‌شود)
-  // typescript: { ignoreBuildErrors: true },
+  // تنظیمات بین‌المللی (i18n) برای زبان‌ها و دامنه‌ها
+  i18n: {
+    locales: ["fa", "en"], // زبان‌های پشتیبانی‌شده
+    defaultLocale: "fa",    // زبان پیش‌فرض
+    domains: [
+      {
+        domain: "example.com",  // دامنه‌ای که برای سایت استفاده می‌کنی
+        defaultLocale: "fa",    // زبان پیش‌فرض در این دامنه
+      },
+    ],
+  },
 };
 
 /** خروجی: پیکربندی + PWA (Workbox) */
