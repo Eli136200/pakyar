@@ -10,17 +10,8 @@ const baseConfig: NextConfig = {
   // جلوگیری از توقف Build روی Render به‌خاطر خطاهای ESLint
   eslint: { ignoreDuringBuilds: true },
 
-  // تنظیمات بین‌المللی (i18n) برای زبان‌ها و دامنه‌ها
-  i18n: {
-    locales: ["fa", "en"], // زبان‌های پشتیبانی‌شده
-    defaultLocale: "fa",    // زبان پیش‌فرض
-    domains: [
-      {
-        domain: "example.com",  // دامنه‌ای که برای سایت استفاده می‌کنی
-        defaultLocale: "fa",    // زبان پیش‌فرض در این دامنه
-      },
-    ],
-  },
+  // تنظیمات بین‌المللی (i18n) در App Router انجام خواهد شد، بدون نیاز به پیکربندی در next.config.ts
+  // برای اطلاعات بیشتر می‌توانید به لینک مستندات Next.js رجوع کنید.
 };
 
 /** خروجی: پیکربندی + PWA (Workbox) */
