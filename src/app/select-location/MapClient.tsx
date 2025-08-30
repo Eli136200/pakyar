@@ -1,60 +1,85 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Circle } from 'react-leaflet';
 
 type LatLng = { lat: number; lng: number };
+type Props = { value: LatLng; onChange: (p: LatLng) => void };
 
-const pinSvg = encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">
-  <g fill="none">
-    <path d="M23 2c9.4 0 17 7.6 17 17 0 11.3-14.5 25-17 25S6 30.3 6 19C6 9.6 13.6 2 23 2z" fill="#16A34A"/>
-    <circle cx="23" cy="19" r="6" fill="#fff"/>
-  </g>
-</svg>
-`);
-const greenPin = new L.Icon({
-  iconUrl: `data:image/svg+xml;utf8,${pinSvg}`,
-  iconSize: [46, 46],
-  iconAnchor: [23, 40],
+const DEFAULT_ZOOM = 16;
+
+const markerIcon = new L.Icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
-function ClickHandler({ onPick }: { onPick: (p: LatLng) => void }) {
+function Recenter({ value }: { value: LatLng }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([value.lat, value.lng]);
+    // تضمین رندر صحیح
+    setTimeout(() => map.invalidateSize(), 0);
+  }, [value, map]);
+  return null;
+}
+
+function ClickHandler({ onChange }: { onChange: (p: LatLng) => void }) {
   useMapEvents({
-    click(e) {
-      onPick(e.latlng);
-    },
+    click(e) { onChange({ lat: e.latlng.lat, lng: e.latlng.lng }); },
   });
   return null;
 }
 
-export default function MapClient({
-  value,
-  onChange,
-}: {
-  value: LatLng;
-  onChange: (v: LatLng) => void;
-}) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+export default function MapClient({ value, onChange }: Props) {
+  const [accuracy, setAccuracy] = useState<number | null>(null);
 
   return (
-    <div className="w-full h-[72vh]">
-      <MapContainer
-        center={[value.lat, value.lng]}
-        zoom={14}
-        className="h-full w-full"
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <MapContainer
+      center={[value.lat, value.lng]}
+      zoom={DEFAULT_ZOOM}
+      style={{ height: '100%', width: '100%' }}   // والد این کامپوننت ارتفاع قطعی دارد
+      scrollWheelZoom
+      whenCreated={(map) => {
+        setTimeout(() => map.invalidateSize(), 0);
+        window.addEventListener('resize', () => map.invalidateSize());
+      }}
+    >
+      {/* اگر TileLayer اختصاصی (مثل نشان) داری، همین‌جا جایگزین کن */}
+      <TileLayer
+        attribution="&copy; OSM contributors"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+
+      <Recenter value={value} />
+      <ClickHandler onChange={onChange} />
+
+      <Marker
+        position={[value.lat, value.lng]}
+        draggable
+        icon={markerIcon}
+        eventHandlers={{
+          dragend: (e) => {
+            const m = e.target as L.Marker;
+            const ll = m.getLatLng();
+            onChange({ lat: ll.lat, lng: ll.lng });
+          },
+        }}
+      />
+
+      {accuracy && (
+        <Circle
+          center={[value.lat, value.lng]}
+          radius={Math.min(accuracy, 80)}
+          pathOptions={{ color: '#22c55e', weight: 1, fillOpacity: 0.15 }}
         />
-        <Marker position={[value.lat, value.lng]} icon={greenPin} />
-        <ClickHandler onPick={onChange} />
-      </MapContainer>
-    </div>
+      )}
+    </MapContainer>
   );
 }

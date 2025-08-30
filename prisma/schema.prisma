@@ -8,10 +8,19 @@ datasource db {
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  phone     String     @unique
-  createdAt DateTime   @default(now())
-  otps      OtpCode[]
+  id               Int        @id @default(autoincrement())
+  phone            String     @unique
+  userType         String     @default("شهروندی") // شهروندی یا صنفی
+  firstName        String?    // نام
+  lastName         String?    // نام خانوادگی
+  gender           String?    // آقا یا خانم
+  birthDate        DateTime?  // تاریخ تولد میلادی
+  email            String?    // ایمیل
+  referralCode     String?    // کد معرف
+  profileCompleted Boolean    @default(false) // آیا پروفایل تکمیل شده؟
+  createdAt        DateTime   @default(now())
+
+  otps             OtpCode[]  // رابطه با کدهای OTP
 }
 
 model OtpCode {

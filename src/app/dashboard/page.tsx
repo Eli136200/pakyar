@@ -1,6 +1,8 @@
 'use client';
 
 import React from "react";
+import { User, Headphones, Smartphone, Newspaper, Store, LifeBuoy } from "lucide-react";
+
 import {
   FaMobileAlt,
   FaHandHoldingHeart,
@@ -12,14 +14,31 @@ import {
   FaTruck,
   FaStore,
   FaHome,
-  FaBell,
+  FaBell, 
+  FaUserTag,
+  FaHeadphones, 
+  FaRegNewspaper, 
+  FaLifeRing,
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import BannerSlider from "@/components/BannerSlider";
+import HomeActionCard from "@/components/HomeActionCard";
 
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  // ✅ فقط استایل کارت‌ها رنگی شده؛ چینش/ابعاد همون قبلی می‌مونه
+  const tiles = [
+    { id: "profile",   title: "پروفایل",          href: "/profile",   Icon: User,       gradient: "from-amber-400 to-orange-500" },
+    { id: "education", title: "آموزش‌ها",         href: "/education", Icon: Headphones, gradient: "from-rose-400 to-fuchsia-500" },
+    { id: "invite",    title: "معرفی به دوستان",  href: "/invite",    Icon: Smartphone, gradient: "from-cyan-500 to-blue-600" },
+    { id: "news",      title: "اخبار",            href: "/news",      Icon: Newspaper,  gradient: "from-teal-600 to-emerald-600" },
+    { id: "shop",      title: "امتیاز ها",          href: "",      Icon: Store,      gradient: "from-yellow-300 to-yellow-500" },
+    { id: "support",   title: "پشتیبانی",         href: "/support",   Icon: LifeBuoy,   gradient: "from-rose-400 to-red-500" },
+  ];
+  
+  
 
   return (
     <div className="min-h-screen bg-white pb-24 font-[IRANYekanXFaNum]">
@@ -28,8 +47,8 @@ export default function DashboardPage() {
         <div className="absolute right-4 top-4 text-white">
           <FaBell className="w-5 h-5" />
         </div>
-        <div className="flex justify-center">
-          <div className="text-white text-3xl font-bold">♻️</div>
+        <div className="flex flex-col items-center mb-8">
+          <img src="/logo-pakyar.png" alt="پاکیار" width={200} height={63} />
         </div>
       </div>
 
@@ -37,34 +56,32 @@ export default function DashboardPage() {
       <div className="relative z-10 -mt-12 px-4">
         <div className="bg-white border-[2px] border-green-600 rounded-[32px] px-4 py-2 flex justify-between items-center shadow-[0_0_0_3px_#16a34a]">
           <div className="flex flex-col items-center w-1/2">
-            <span className="text-sm text-gray-500">اعتبار</span>
-            <div className="flex items-center gap-1 font-bold">
-              <span>۰</span>
-              <span className="text-sm text-gray-600">تومان</span>
-            </div>
+            <span className="text-sm text-gray-500 font-bold">اعتبار</span>
+           { /* <div className="flex items-center gap-1 font-bold">
+             <span>۰</span>
+          </div>*/}
           </div>
           <div className="w-px h-8 bg-gray-300" />
           <div className="flex flex-col items-center w-1/2">
-            <span className="text-sm text-gray-500">نام یا شماره کاربر</span>
-            <span className="font-bold">۰</span>
+            <span className="text-sm text-gray-500 font-bold">نام  کاربر</span>
+     
           </div>
         </div>
       </div>
 
       {/* بنر اسلایدر */}
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-4 mx-5 mb-0">
         <BannerSlider />
       </div>
 
-      {/* دکمه‌ها */}
-      <div className="px-2 mt-8 grid grid-cols-3 gap-2">
-        <Tile icon={<FaMobileAlt />} label="معرفی به دوستان" onClick={() => alert("معرفی به دوستان")} />
-        <Tile icon={<FaHeadset />} label="آموزش‌ها" onClick={() => alert("آموزش‌ها")} />
-        <Tile icon={<FaTags />} label="قیمت پسماند" onClick={() => alert("قیمت پسماند")} />
-        <Tile icon={<FaHandHoldingHeart />} label="اخبار شهر" onClick={() => alert("اخبار شهر")} />
-        <Tile icon={<FaWallet />} label="فروشگاه" onClick={() => alert("فروشگاه")} />
-        <Tile icon={<FaFileInvoiceDollar />} label="پشتیبانی" onClick={() => alert("پشتیبانی")} />
-      </div>
+      {/* گرید کارت‌ها ـ هم‌شکل عکس اول، ولی رنگی */}
+      <section className="px-4 mt-6 mx-5" dir="rtl">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          {tiles.map((t) => (
+            <HomeActionCard key={t.id} {...t} />
+          ))}
+        </div>
+      </section>
 
       {/* بخش CTA */}
       <div className="p-4 mt-2">
@@ -91,15 +108,9 @@ export default function DashboardPage() {
 
 /* --- Components --- */
 
-function Tile({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
+// (اختیاری) این Tile دیگه استفاده نمی‌شه، ولی حذفش نکردم که چیزی نشکنه.
+// اگر خواستی پاکش کن.
+function Tile({ icon, label, onClick }) {
   return (
     <div
       onClick={onClick}
@@ -112,11 +123,17 @@ function Tile({
 }
 
 function BottomNav() {
+  const router = useRouter(); 
+
   return (
     <nav className="fixed bottom-0 inset-x-0 bg-white shadow">
       <div className="max-w-md mx-auto grid grid-cols-5 text-xs py-2">
         <BottomItem label="باشگاه" icon={<FaGift />} onClick={() => alert("باشگاه")} />
-        <BottomItem label="پروفایل" icon={<FaWallet />} onClick={() => alert("پروفایل")} />
+        <BottomItem 
+          label="پروفایل" 
+          icon={<FaWallet />} 
+          onClick={() => router.push("/profile")} 
+        />
         <BottomItem label="جمع‌آوری" icon={<FaTruck />} onClick={() => alert("جمع‌آوری")} />
         <BottomItem label="فروشگاه" icon={<FaStore />} onClick={() => alert("فروشگاه")} />
         <BottomItem label="خانه" icon={<FaHome />} active onClick={() => alert("خانه")} />
@@ -125,17 +142,7 @@ function BottomNav() {
   );
 }
 
-function BottomItem({
-  label,
-  icon,
-  active = false,
-  onClick,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  active?: boolean;
-  onClick: () => void;
-}) {
+function BottomItem({ label, icon, active = false, onClick }) {
   return (
     <button
       onClick={onClick}
