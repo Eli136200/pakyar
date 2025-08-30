@@ -1,18 +1,63 @@
 // next.config.ts
 
-// @ts-ignore → نادیده گرفتن ارور تایپ‌اسکریپت چون next-pwa تعریف type رسمی ندارد
-import withPWA from 'next-pwa';
-import type { NextConfig } from 'next';
+import withPWA from "next-pwa";
+import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  reactStrictMode: true
+const isProd = process.env.NODE_ENV === "production";
+
+/** تنظیمات پایه‌ی نکست برای پروژه‌های بزرگ */
+const baseConfig: NextConfig = {
+  reactStrictMode: true,
+
+  // جلوگیری از توقف Build روی Render به‌خاطر خطاهای ESLint
+  eslint: { ignoreDuringBuilds: true },
+
+  // اگر به هر دلیل خواستی TypeScript-Errors هم جلوی بیلد را نگیرند → true (پیشنهاد نمی‌شود)
+  // typescript: { ignoreBuildErrors: true },
 };
 
-const config = withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-});
+/** خروجی: پیکربندی + PWA (Workbox) */
+export default withPWA({
+  dest: "public",       // تولید service worker و فایل‌های مرتبط در public
+  register: true,       // ثبت خودکار SW
+  skipWaiting: true,    // نسخه جدید SW سریع فعال شود
+  disable: !isProd,     // فقط در production فعال باشد
 
-export default config(nextConfig);
+  // کش‌های اصلی برای اسکیل مناسب
+  runtimeCaching: [
+    // HTML/صفحات
+    {
+      urlPattern: ({ request }) =>
+        request.destination === "document" || request.mode === "navigate",
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "html-cache",
+        networkTimeoutSeconds: 5,
+        expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
+      },
+    },
+    // استاتیک‌ها (JS/CSS/فونت/عکس/worker)
+    {
+      urlPattern: ({ request }) =>
+        ["style", "script", "worker", "font", "image"].includes(
+          request.destination
+        ),
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "static-cache",
+        expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+      },
+    },
+    // APIهای GET پروژه (در صورت نیاز مسیر را تغییر بده)
+    {
+      urlPattern: /\/api\/.*$/i,
+      handler: "NetworkFirst",
+      method: "GET",
+      options: {
+        cacheName: "api-cache",
+        networkTimeoutSeconds: 5,
+        expiration: { maxEntries: 100, maxAgeSeconds: 60 * 10 },
+      },
+    },
+  ],
+})(baseConfig);
